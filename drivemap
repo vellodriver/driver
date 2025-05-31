@@ -1,0 +1,48 @@
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoidmVsbG9kcml2ZXIiLCJhIjoiY21iMGc2azhiMHcyNDJrcTJrN3F3dnp1bSJ9.A6iU7GA4IixnaTbhJPe9hQ';
+
+  let map;
+  let marker;
+  let userLocation = [0, 0];
+
+  function updateMap(position) {
+    userLocation = [position.coords.longitude, position.coords.latitude];
+
+    if (!map) {
+      map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: userLocation,
+        zoom: 15,
+        dragPan: false,
+        scrollZoom: false,
+        boxZoom: false,
+        doubleClickZoom: false,
+        touchZoomRotate: false,
+        keyboard: false
+      });
+
+      // Desativa o cursor de "mão" ao passar sobre o mapa
+      map.getCanvas().style.cursor = 'default';
+
+      // Cria marcador
+      marker = new mapboxgl.Marker({ color: 'red' })
+        .setLngLat(userLocation)
+        .setPopup(new mapboxgl.Popup().setText('Você está aqui!'))
+        .addTo(map);
+    } else {
+      marker.setLngLat(userLocation);
+      map.flyTo({ center: userLocation, zoom: 15 });
+    }
+  }
+
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(
+      updateMap,
+      () => alert('Não foi possível acessar sua localização.'),
+      { enableHighAccuracy: true, maximumAge: 0 }
+    );
+  } else {
+    alert('Geolocalização não é suportada neste navegador.');
+  }
+</script>
