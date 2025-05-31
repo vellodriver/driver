@@ -1,48 +1,59 @@
-<script>
-  mapboxgl.accessToken = 'pk.eyJ1IjoidmVsbG9kcml2ZXIiLCJhIjoiY21iMGc2azhiMHcyNDJrcTJrN3F3dnp1bSJ9.A6iU7GA4IixnaTbhJPe9hQ';
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Localização em Tempo Real</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  let map;
-  let marker;
-  let userLocation = [0, 0];
+    <!-- Mapbox CSS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
 
-  function updateMap(position) {
-    userLocation = [position.coords.longitude, position.coords.latitude];
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    </style>
+</head>
 
-    if (!map) {
-      map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/streets-v12',
-        center: userLocation,
-        zoom: 15,
-        dragPan: false,
-        scrollZoom: false,
-        boxZoom: false,
-        doubleClickZoom: false,
-        touchZoomRotate: false,
-        keyboard: false
-      });
+<body>
+    <div id="map"></div>
 
-      // Desativa o cursor de "mão" ao passar sobre o mapa
-      map.getCanvas().style.cursor = 'default';
+    <!-- Mapbox JS -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
-      // Cria marcador
-      marker = new mapboxgl.Marker({ color: 'red' })
-        .setLngLat(userLocation)
-        .setPopup(new mapboxgl.Popup().setText('Você está aqui!'))
-        .addTo(map);
-    } else {
-      marker.setLngLat(userLocation);
-      map.flyTo({ center: userLocation, zoom: 15 });
-    }
-  }
+    <script>
+        // 🔑 Insira sua chave pública do Mapbox aqui
+        mapboxgl.accessToken = 'pk.eyJ1IjoidmVsbG9kcml2ZXIiLCJhIjoiY21iMGc2azhiMHcyNDJrcTJrN3F3dnp1bSJ9.A6iU7GA4IixnaTbhJPe9hQ';
 
-  if (navigator.geolocation) {
-    navigator.geolocation.watchPosition(
-      updateMap,
-      () => alert('Não foi possível acessar sua localização.'),
-      { enableHighAccuracy: true, maximumAge: 0 }
-    );
-  } else {
-    alert('Geolocalização não é suportada neste navegador.');
-  }
-</script>
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v12',
+            center: [0, 0], // Será atualizado com sua localização
+            zoom: 15
+        });
+
+        const marker = new mapboxgl.Marker({ color: 'red' });
+
+        function success(position) {
+            const lng = position.coords.longitude;
+            const lat = position.coords.latitude;
+
+            map.setCenter([lng, lat]);
+            marker.setLngLat([lng, lat]).addTo(map);
+        }
+
+        function error() {
+            alert('Não foi possível obter sua localização.');
+        }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(success, error, {
+                enableHighAccuracy: true,
+                maximumAge: 10000,
+                timeout: 5000
+            });
+        } else {
+            alert('Geolocalização não é suportada neste navegador.');
+        }
+    </script>
+</body>
+</html>
